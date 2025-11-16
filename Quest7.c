@@ -1,35 +1,70 @@
 #include <stdio.h>
 #include <string.h>
 
-void xor(char *a, char *b) {
-    for (int i = 1; i < strlen(b); i++)
-        a[i] = (a[i] == b[i]) ? '0' : '1';
-}
-
 void crc(char data[], char key[], char rem[]) {
-    int keylen = strlen(key);
-    char temp[50];
+    int dataLen = strlen(data);
+    int keyLen = strlen(key);
+    char temp[100];
     strcpy(temp, data);
 
-    for (int i = 0; i <= strlen(data) - keylen; i++) {
-        if (temp[i] == '1')
-            for (int j = 0; j < keylen; j++)
-                temp[i + j] = (temp[i + j] == key[j]) ? '0' : '1';
+    for (int i = 0; i < keyLen - 1; i++) {
+        strcat(temp, "0");
     }
-    strcpy(rem, temp + strlen(data) - keylen + 1);
+
+    for (int i = 0; i <= strlen(temp) - keyLen; i++) {
+        if (temp[i] == '1') {
+            for (int j = 0; j < keyLen; j++) {
+                if (temp[i + j] == key[j]) {
+                    temp[i + j] = '0';
+                } else {
+                    temp[i + j] = '1';
+                }
+            }
+        }
+    }
+
+    // Extract remainder (last keyLen - 1 bits)
+    int start = strlen(temp) - keyLen + 1;
+    for (int i = 0; i < keyLen - 1; i++) {
+        rem[i] = temp[start + i];
+    }
+    rem[keyLen - 1] = '\0';
 }
 
 int main() {
-    char data[50], key[20], rem[20];
-    printf("Enter data bits: ");
-    scanf("%s", data);
-    printf("Enter 16-bit key: ");
-    scanf("%s", key);
+    char data[] = "11010011101100";                    // Data bits
+    char key[]  = "10001000000100001";                 // Example 16-bit generator polynomial
+    char rem[30], codeword[150], checkRem[30];
+    int i, error = 0;
 
-    strcat(data, "0000000000000000");  // append 16 zeros
+    printf("Original Data: %s\n", data);
+    printf("Generator (Key): %s\n", key);
+
+    // Sender side
     crc(data, key, rem);
 
-    printf("CRC Remainder: %s\n", rem);
-    printf("Transmitted Codeword: %s%s\n", data, rem);
+    // Form transmitted codeword (data + remainder)
+    strcpy(codeword, data);
+    strcat(codeword, rem);
+
+    printf("\nCRC Remainder: %s", rem);
+    printf("\nTransmitted Codeword: %s\n", codeword);
+
+    // Receiver side verification
+    crc(codeword, key, checkRem);
+
+    for (i = 0; i < strlen(checkRem); i++) {
+        if (checkRem[i] != '0') {
+            error = 1;
+            break;
+        }
+    }
+
+    if (error == 1) {
+        printf("\n⚠️  Error detected during transmission!\n");
+    } else {
+        printf("\n✅ No error detected — data received correctly.\n");
+    }
+
     return 0;
 }
