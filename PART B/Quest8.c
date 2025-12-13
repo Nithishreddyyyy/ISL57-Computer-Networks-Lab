@@ -9,25 +9,36 @@ typedef struct {
 	int wt;
 } Edge;
 
-int bellmanFord(int V, Edge edges[], int E, int src, int dist[]) {
-	for (int i = 0; i < V; i++) dist[i] = INF;
-	dist[src] = 0;
+int bellman(int V, Edge edge[], int E, int src, int dist[]) {
 
-	for (int i = 0; i < V; i++) {
-		for (int j = 0; j < E; j++) {
-			int u = edges[j].u;
-			int v = edges[j].v;
-			int wt = edges[j].wt;
-			if (dist[u] != INF && dist[u] + wt < dist[v]) {
-				if (i == V - 1) {
-					// negative cycle detected
-					return -1;
-				}
-				dist[v] = dist[u] + wt;
-			}
-		}
-	}
-	return 0;
+    for (int i = 0; i < V; i++)
+        dist[i] = INF;
+
+    dist[src] = 0;
+
+    for (int i = 0; i < V - 1; i++) {
+        for (int j = 0; j < E; j++) {
+            int u = edge[j].u;
+            int v = edge[j].v;
+            int wt = edge[j].wt;
+
+            if (dist[u] != INF && dist[u] + wt < dist[v]) {
+                dist[v] = dist[u] + wt;
+            }
+        }
+    }
+
+    for (int j = 0; j < E; j++) {
+        int u = edge[j].u;
+        int v = edge[j].v;
+        int wt = edge[j].wt;
+
+        if (dist[u] != INF && dist[u] + wt < dist[v]) {
+            return -1;
+        }
+    }
+
+    return 0;
 }
 
 int main(void) {
