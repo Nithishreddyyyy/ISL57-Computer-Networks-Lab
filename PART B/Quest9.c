@@ -3,13 +3,56 @@
 #define N 5
 #define INF 9999
 
-struct Node {
+void dijkstra(int graph[N][N], int source) {
+    int visited[N] = {0};
     int dist[N];
-    int via[N];
-};
+    int i, j, count, u, min;
+
+    // Initialize distances
+    for (i = 0; i < N; i++)
+        dist[i] = INF;
+
+    dist[source] = 0;
+
+    // Dijkstra algorithm
+    for (count = 0; count < N - 1; count++) {
+        min = INF;
+        u = -1;
+
+        // Select unvisited node with minimum distance
+        for (i = 0; i < N; i++) {
+            if (!visited[i] && dist[i] < min) {
+                min = dist[i];
+                u = i;
+            }
+        }
+
+        if (u == -1)
+            break;
+
+        visited[u] = 1;
+
+        // Update distances of adjacent nodes
+        for (j = 0; j < N; j++) {
+            if (!visited[j] && graph[u][j] != INF &&
+                dist[u] + graph[u][j] < dist[j]) {
+                dist[j] = dist[u] + graph[u][j];
+            }
+        }
+    }
+
+    // Print result
+    printf("\nShortest paths from node %c:\n", 'A' + source);
+    for (i = 0; i < N; i++) {
+        if (dist[i] != INF)
+            printf("%c -> %c = %d\n", 'A' + source, 'A' + i, dist[i]);
+        else
+            printf("%c -> %c = Not reachable\n", 'A' + source, 'A' + i);
+    }
+}
 
 int main() {
-    int cost[N][N] = {
+    int graph[N][N] = {
         {0,   2,   INF, 1,   INF},  // A
         {2,   0,   3,   2,   INF},  // B
         {INF, 3,   0,   4,   5},    // C
@@ -17,36 +60,11 @@ int main() {
         {INF, INF, 5,   3,   0}     // E
     };
 
-    struct Node node[N];
-    int i, j, k, updated;
+    int source;
+    printf("Enter source node (0=A, 1=B, 2=C, 3=D, 4=E): ");
+    scanf("%d", &source);
 
-    // Initialize routing tables
-    for (i = 0; i < N; i++)
-        for (j = 0; j < N; j++) {
-            node[i].dist[j] = cost[i][j];
-            node[i].via[j] = j;
-        }
-
-    // Distance Vector Algorithm
-    do {
-        updated = 0;
-        for (i = 0; i < N; i++)
-            for (j = 0; j < N; j++)
-                for (k = 0; k < N; k++)
-                    if (node[i].dist[j] > cost[i][k] + node[k].dist[j]) {
-                        node[i].dist[j] = cost[i][k] + node[k].dist[j];
-                        node[i].via[j] = k;
-                        updated = 1;
-                    }
-    } while (updated);
-
-    // Display Final Distance Tables
-    for (i = 0; i < N; i++) {
-        printf("\nRouting Table for Router %c:\n", 'A' + i);
-        printf("Dest\tNextHop\tDist\n");
-        for (j = 0; j < N; j++)
-            printf("  %c\t   %c\t   %d\n", 'A' + j, 'A' + node[i].via[j], node[i].dist[j]);
-    }
+    dijkstra(graph, source);
 
     return 0;
 }

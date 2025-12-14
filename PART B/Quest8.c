@@ -1,64 +1,51 @@
 #include <stdio.h>
 
-#define INF 100000000
+#define N 5
+#define INF 9999
 
-typedef struct {
-    int u;
-    int v;
-    int wt;
-} Edge;
+struct Node {
+    int dist[N];
+    int via[N];
+};
 
-int bellmanFord(int V, Edge edge[], int E, int src, int dist[]) {
-    for (int i = 0; i < V; i++){
-		dist[i] = INF;
-	}
-    dist[src] = 0;
-
-    for (int i = 0; i < V - 1; i++) {
-        for (int j = 0; j < E; j++) {
-            int u = edge[j].u;
-            int v = edge[j].v;
-            int wt = edge[j].wt;
-
-            if (dist[u] != INF && dist[u] + wt < dist[v]) {
-                dist[v] = dist[u] + wt;
-            }
-        }
-    }
-
-    for (int j = 0; j < E; j++) {
-        int u = edge[j].u;
-        int v = edge[j].v;
-        int wt = edge[j].wt;
-
-        if (dist[u] != INF && dist[u] + wt < dist[v]) {
-            return -1;
-        }
-    }
-    return 0;
-}
-
-int main(void) {
-    int V = 5;
-    Edge edges[] = {
-        {1, 3, 2},
-        {4, 3, -1},
-        {2, 4, 1},
-        {1, 2, 1},
-        {0, 1, 5}
+int main() {
+    int cost[N][N] = {
+        {0,   2,   INF, 1,   INF},  // A
+        {2,   0,   3,   2,   INF},  // B
+        {INF, 3,   0,   4,   5},    // C
+        {1,   2,   4,   0,   3},    // D
+        {INF, INF, 5,   3,   0}     // E
     };
-    int E = sizeof(edges) / sizeof(edges[0]);
-    int src = 0;   
-    int dist[5];
 
-    if (bellmanFord(V, edges, E, src, dist) == -1) {
-        printf("-1\n");
-    } else {
-        for (int i = 0; i < V; i++) {
-            if (i) printf(" ");
-            printf("%d", dist[i]);
+    struct Node node[N];
+    int i, j, k, updated;
+
+    // Initialize routing tables
+    for (i = 0; i < N; i++)
+        for (j = 0; j < N; j++) {
+            node[i].dist[j] = cost[i][j];
+            node[i].via[j] = j;
         }
-        printf("\n");
+
+    // Distance Vector Algorithm
+    do {
+        updated = 0;
+        for (i = 0; i < N; i++)
+            for (j = 0; j < N; j++)
+                for (k = 0; k < N; k++)
+                    if (node[i].dist[j] > cost[i][k] + node[k].dist[j]) {
+                        node[i].dist[j] = cost[i][k] + node[k].dist[j];
+                        node[i].via[j] = k;
+                        updated = 1;
+                    }
+    } while (updated);
+
+    // Display Final Distance Tables
+    for (i = 0; i < N; i++) {
+        printf("\nRouting Table for Router %c:\n", 'A' + i);
+        printf("Dest\tNextHop\tDist\n");
+        for (j = 0; j < N; j++)
+            printf("  %c\t   %c\t   %d\n", 'A' + j, 'A' + node[i].via[j], node[i].dist[j]);
     }
 
     return 0;
