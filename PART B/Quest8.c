@@ -46,7 +46,7 @@ int main(){
         printf("\nRouting Table for Router %c:\n", 'A' + i);
         printf("Dest\tNextHop\tDist\n");
         for(j = 0 ; j < N ; j++){
-            printf("%c\t%c\t%d\n",'A'+j,'A' + node[i].via[j]);
+            printf("%c\t%c\t%d\n",'A'+j,'A' + node[i].via[j], node[i].dist[j]);
         }
     }
     return 0;
