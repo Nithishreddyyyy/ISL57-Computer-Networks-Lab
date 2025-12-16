@@ -5,14 +5,14 @@ void crc(char data[], char key[], char rem[]) {
     int dataLen = strlen(data);
     int keyLen  = strlen(key);
 
-    char temp[200];                    
+    char temp[200];
     strcpy(temp, data);
 
     for (int i = 0; i < keyLen - 1; i++) {
         strcat(temp, "0");
     }
 
-    int tempLen = strlen(temp);         // FIX: compute once
+    int tempLen = strlen(temp);
 
     for (int i = 0; i <= tempLen - keyLen; i++) {
         if (temp[i] == '1') {
@@ -21,6 +21,7 @@ void crc(char data[], char key[], char rem[]) {
             }
         }
     }
+
     for (int i = 0; i < keyLen - 1; i++) {
         rem[i] = temp[dataLen + i];
     }
@@ -30,27 +31,38 @@ void crc(char data[], char key[], char rem[]) {
 int main() {
     char data[] = "11010011101100";
     char key[]  = "10001000000100001";   // CRC-16 polynomial
-    char rem[30], codeword[200], checkRem[30];
+
+    char rem[30], codeword[200], received[200], checkRem[30];
     int error = 0;
+
     printf("Original Data: %s\n", data);
     printf("Generator (Key): %s\n", key);
-    // Sender side
+
+    /* Sender side */
     crc(data, key, rem);
     strcpy(codeword, data);
     strcat(codeword, rem);
+
     printf("\nCRC Remainder: %s", rem);
     printf("\nTransmitted Codeword: %s\n", codeword);
-    // Receiver side
-    crc(codeword, key, checkRem);
+
+    /* Receiver side */
+    printf("\nEnter received codeword: ");
+    scanf("%s", received);
+
+    crc(received, key, checkRem);
+
     for (int i = 0; i < strlen(checkRem); i++) {
         if (checkRem[i] != '0') {
             error = 1;
             break;
         }
     }
+
     if (error)
         printf("\n⚠️  Error detected during transmission!\n");
     else
         printf("\n✅ No error detected — data received correctly.\n");
+
     return 0;
 }
